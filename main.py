@@ -1,5 +1,6 @@
 import tkinter as tk
 from tkinter import filedialog
+from tkinter.constants import BOTTOM, S
 from ASCIIConverter import *
 from texts import *
 import ntpath
@@ -32,6 +33,9 @@ def shortConversion():
 
     #get the image path and the file name
     filePath = getImagePath()
+
+    if not filePath: return
+
     fileName = ntpath.basename(filePath).split(".")[0]
 
     #grab the image
@@ -39,6 +43,8 @@ def shortConversion():
 
     #convert to ascii
     convertToASCII(image, fileName, True)
+
+    showOutputText(fileName)
 
 # Long 70 character conversion
 def longConversion():
@@ -53,19 +59,24 @@ def longConversion():
     image = openImage(filePath)
 
     convertToASCII(image, fileName, False)
+    showOutputText(fileName)
 
+#Show a confirmation text
+def showOutputText(fileName):
+    SUCCESSFULL_OUTPUT_TEXT.config(text="Success! The file can be found at {0}{1}{2}".format(OUTPUT_PATH, fileName, EXTENSION))
+    SUCCESSFULL_OUTPUT_TEXT.pack(pady=50)
 
 # Buttons and Labels
 TITLE = tk.Label(app, text=TITLE_TXT, font=(DEFAULT_FONT, 30))
 TITLE.pack()
 
 ASCII_SELECTION_SHORT_BUTTON = tk.Button(app, text=ASCII_SHORT_TXT, font=(DEFAULT_FONT, 20), command=shortConversion)
-ASCII_SELECTION_SHORT_BUTTON.place(relx=0.3, rely=0.3)
+ASCII_SELECTION_SHORT_BUTTON.place(relx=0.3, rely=0.4)
 
 ASCII_SELECTION_LONG_BUTTON = tk.Button(app, text=ASCII_LONG_TXT, font=(DEFAULT_FONT, 20), command=longConversion)
-ASCII_SELECTION_LONG_BUTTON.place(relx=0.27, rely=0.4)
+ASCII_SELECTION_LONG_BUTTON.place(relx=0.27, rely=0.5)
 
-ASCII_SHORT_INSTR = tk.Label(app, text="")
+SUCCESSFULL_OUTPUT_TEXT = tk.Label(app, font=(DEFAULT_FONT, 20))
 
 ABOUT_TEXT = tk.Label(app, text=ABOUT_TXT, font=(DEFAULT_FONT, 15))
 ABOUT_TEXT.pack()
