@@ -1,6 +1,5 @@
 import tkinter as tk
 from tkinter import filedialog
-from tkinter.constants import BOTTOM, S
 from ASCIIConverter import *
 from texts import *
 import ntpath
@@ -13,17 +12,52 @@ app.geometry(RESOLUTION)
 app.resizable(False, False)
 app.title(TITLE_TXT)
 
-'''
-Open the window for the user to choose an image
 
-Return the image path
-'''
+# Open the window for the user to choose an image
 def getImagePath():
     filePath = filedialog.askopenfilename(initialdir = "./", 
         title = "Select a to convert to ASCII art", 
         filetypes = (("PNG files", "*.png*"), ("JPG files", "*.jpg*")))
 
     return filePath
+
+# Resize the image depending on the inputs
+def parseNewDimensions(image, new_width, new_height):
+    ERR_DIM_TEXT.place_forget()
+
+    # If width and height box are filled
+    if new_width and new_height:
+        try: #make sure the inputs are integers
+            new_width = int(new_width) 
+            new_height = int(new_height)
+        except: #display err and return original img
+            ERR_DIM_TEXT.place(relx=0.12, rely=0.7)
+            return image
+
+        return resizeImage(image, new_width, new_height)
+
+    #If width is filled
+    elif new_width:
+        try:
+            new_width = int(new_width)
+        except: 
+            ERR_DIM_TEXT.place(relx=0.12, rely=0.7)
+            return image
+
+        return resizeImage(image, new_width, image.height)
+
+    #If height is filled
+    elif new_height:
+        try:
+            new_height = int(new_height)
+        except:
+            ERR_DIM_TEXT.place(relx=0.12, rely=0.7)
+            return image
+
+        return resizeImage(image, image.width, new_height)
+    
+    #if none are filled, return the original img
+    else: return image
 
 # Short 10 character conversion
 def shortConversion():
@@ -36,14 +70,20 @@ def shortConversion():
 
     if not filePath: return
 
-    fileName = ntpath.basename(filePath).split(".")[0]
-
     #grab the image
     image = openImage(filePath)
 
-    #convert to ascii
-    convertToASCII(image, fileName, True)
+    fileName = ntpath.basename(filePath).split(".")[0]
 
+    new_width = CHANGE_WIDTH_INPUT_BOX.get()
+    new_height = CHANGE_HEIGHT_INPUT_BOX.get()
+
+    resized_image = parseNewDimensions(image, new_width, new_height)
+
+    #convert to ascii
+    convertToASCII(resized_image, fileName, True)
+
+    #display the filename
     showOutputText(fileName)
 
 # Long 70 character conversion
@@ -58,7 +98,13 @@ def longConversion():
 
     image = openImage(filePath)
 
-    convertToASCII(image, fileName, False)
+    new_width = CHANGE_WIDTH_INPUT_BOX.get()
+    new_height = CHANGE_HEIGHT_INPUT_BOX.get()
+
+    resized_image = parseNewDimensions(image, new_width, new_height)
+
+    convertToASCII(resized_image, fileName, False)
+
     showOutputText(fileName)
 
 #Show a confirmation text
@@ -71,12 +117,25 @@ TITLE = tk.Label(app, text=TITLE_TXT, font=(DEFAULT_FONT, 30))
 TITLE.pack()
 
 ASCII_SELECTION_SHORT_BUTTON = tk.Button(app, text=ASCII_SHORT_TXT, font=(DEFAULT_FONT, 20), command=shortConversion)
-ASCII_SELECTION_SHORT_BUTTON.place(relx=0.3, rely=0.4)
+ASCII_SELECTION_SHORT_BUTTON.place(relx=0.3, rely=0.3)
 
 ASCII_SELECTION_LONG_BUTTON = tk.Button(app, text=ASCII_LONG_TXT, font=(DEFAULT_FONT, 20), command=longConversion)
-ASCII_SELECTION_LONG_BUTTON.place(relx=0.27, rely=0.5)
+ASCII_SELECTION_LONG_BUTTON.place(relx=0.27, rely=0.4)
+
+CHANGE_WIDTH_TEXT = tk.Label(app, text="New Width", font=(DEFAULT_FONT, 15))
+CHANGE_WIDTH_TEXT.place(relx=0.3, rely=0.5)
+
+CHANGE_HEIGHT_TEXT = tk.Label(app, text="New Height", font=(DEFAULT_FONT, 15))
+CHANGE_HEIGHT_TEXT.place(relx=0.3, rely=0.55)
+
+CHANGE_WIDTH_INPUT_BOX = tk.Entry(app, width=20)
+CHANGE_WIDTH_INPUT_BOX.place(relx=0.45, rely=0.51)
+
+CHANGE_HEIGHT_INPUT_BOX = tk.Entry(app, width=20)
+CHANGE_HEIGHT_INPUT_BOX.place(relx=0.45, rely=0.56)
 
 SUCCESSFULL_OUTPUT_TEXT = tk.Label(app, font=(DEFAULT_FONT, 20))
+ERR_DIM_TEXT = tk.Label(app, text=ERR_TXT, font=(DEFAULT_FONT, 20), fg="red")
 
 ABOUT_TEXT = tk.Label(app, text=ABOUT_TXT, font=(DEFAULT_FONT, 15))
 ABOUT_TEXT.pack()
